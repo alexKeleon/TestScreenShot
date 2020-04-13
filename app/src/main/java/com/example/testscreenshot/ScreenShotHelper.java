@@ -47,7 +47,7 @@ public class ScreenShotHelper {
             public void run() {
                 new CreateBitmapTask().execute();
             }
-        }, 1000);
+        }, 2000);
     }
 
     public class CreateBitmapTask extends AsyncTask<Image, Void, Bitmap> {

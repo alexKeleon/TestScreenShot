@@ -1,15 +1,33 @@
 package com.example.testscreenshot;
 
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,6 +35,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Button mBtn;
     private ImageView mImageView;
+
+    public static final String PIC_DIR_NAME = "myPhotos"; //在系统的图片文件夹下创建了一个相册文件夹，名为“myPhotos"，所有的图片都保存在该文件夹下。
+
+    private File mPicDir = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), PIC_DIR_NAME); //图片统一保存在系统的图片文件夹中
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,14 +52,27 @@ public class MainActivity extends AppCompatActivity {
         mBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 try2StartScreenShot();
+                finish();
             }
         });
     }
 
     private void try2StartScreenShot() {
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+        Intent capIntent = mediaProjectionManager.createScreenCaptureIntent();
+        //startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+//        ScheduledExecutorService scheduledExecutorService =  Executors.newScheduledThreadPool(1);
+//        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+//            @Override
+//            public void run() {
+//                MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+//                startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+//            }
+//        },0,3, TimeUnit.SECONDS);
+        Intent intent = new Intent(this, ScreenShotService.class);
+        startService(intent);
     }
 
     @Override
@@ -48,10 +84,40 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onFinish(Bitmap bitmap) {
                         mImageView.setImageBitmap(bitmap);
+                        saveImageToGallery(bitmap);
                     }
                 });
                 screenShotHelper.startScreenShot();
             }
         }
     }
+
+    public void saveImageToGallery(Bitmap bitmap) {
+        OutputStream out = null;
+        try {
+            mPicDir.mkdirs();
+            String fileName = "screen_shot" + System.currentTimeMillis();
+            String savedImageURL = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, "xxx");
+            System.out.println(savedImageURL);
+            Uri uri = Uri.parse(savedImageURL);
+            if (uri != null) {
+//                out = getContentResolver().openOutputStream(uri);
+//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.flush();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }
