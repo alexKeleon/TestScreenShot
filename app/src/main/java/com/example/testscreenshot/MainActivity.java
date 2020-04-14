@@ -14,11 +14,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,25 +57,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 try2StartScreenShot();
-                finish();
             }
         });
     }
 
     private void try2StartScreenShot() {
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        Intent capIntent = mediaProjectionManager.createScreenCaptureIntent();
-        //startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
-//        ScheduledExecutorService scheduledExecutorService =  Executors.newScheduledThreadPool(1);
-//        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-//            @Override
-//            public void run() {
-//                MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-//                startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
-//            }
-//        },0,3, TimeUnit.SECONDS);
-        Intent intent = new Intent(this, ScreenShotService.class);
-        startService(intent);
+        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
     }
 
     @Override
@@ -83,11 +74,12 @@ public class MainActivity extends AppCompatActivity {
                 ScreenShotHelper screenShotHelper = new ScreenShotHelper(MainActivity.this, resultCode, data, new ScreenShotHelper.OnScreenShotListener() {
                     @Override
                     public void onFinish(Bitmap bitmap) {
-                        mImageView.setImageBitmap(bitmap);
                         saveImageToGallery(bitmap);
                     }
                 });
-                screenShotHelper.startScreenShot();
+                ScreenShotApp.getInstance().setScreenShotHelper(screenShotHelper);
+//                Intent intent = new Intent(this, ScreenShotService.class);
+//                startService(intent);
             }
         }
     }

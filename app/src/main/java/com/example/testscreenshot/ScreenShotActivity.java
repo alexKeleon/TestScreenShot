@@ -10,9 +10,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Window;
+
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class ScreenShotActivity extends Activity {
         getWindow().setDimAmount(0f);
 
         requestScreenShot();
+        finish();
     }
 
     public void requestScreenShot() {
@@ -57,10 +59,10 @@ public class ScreenShotActivity extends Activity {
                         Log.d("sceenshot onFinish", "sceenshot save: " + new Date().
                                 toString());
                         saveImageToGallery(bitmap);
-                        finish();
 
                     }
                 });
+                //起定时任务
                 screenShotHelper.startScreenShot();
             }
         }
