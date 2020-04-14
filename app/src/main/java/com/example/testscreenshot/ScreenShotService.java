@@ -32,12 +32,6 @@ public class ScreenShotService extends Service {
                 startActivity(i);
             }
         }).start();
-        AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        int five = 5000; // 这是5s
-        long triggerAtTime = SystemClock.elapsedRealtime() + five;
-        Intent i = new Intent(this, AlarmReceiver.class);
-        PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
-        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
         return super.onStartCommand(intent, flags, startId);
     }
 

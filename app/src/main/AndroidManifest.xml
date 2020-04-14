@@ -3,6 +3,7 @@
     package="com.example.testscreenshot">
 
     <application
+        android:name=".ScreenShotApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,21 +18,14 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.example.testscreenshot.ScreenShotActivity"
-            android:exported="true"
-            android:theme="@android:style/Theme.Dialog">
-            <intent-filter>
-                <action android:name="testsceenshot.shotter"></action>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <service android:name=".ScreenShotService" />
+        <service android:name=".ScreenShotJobIntentService"
+        android:permission="android.permission.BIND_JOB_SERVICE"
+        android:exported="true"/>
         <receiver android:name=".AlarmReceiver"/>
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 
 </manifest>

@@ -1,6 +1,8 @@
 package com.example.testscreenshot;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -46,33 +49,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBtn = findViewById(R.id.btn);
-        mImageView = findViewById(R.id.iv);
-
-        mBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                try2StartScreenShot();
-                finish();
-            }
-        });
+        try2StartScreenShot();
     }
 
     private void try2StartScreenShot() {
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        Intent capIntent = mediaProjectionManager.createScreenCaptureIntent();
-        //startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
-//        ScheduledExecutorService scheduledExecutorService =  Executors.newScheduledThreadPool(1);
-//        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-//            @Override
-//            public void run() {
-//                MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-//                startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
-//            }
-//        },0,3, TimeUnit.SECONDS);
-        Intent intent = new Intent(this, ScreenShotService.class);
-        startService(intent);
+        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
     }
 
     @Override
@@ -83,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
                 ScreenShotHelper screenShotHelper = new ScreenShotHelper(MainActivity.this, resultCode, data, new ScreenShotHelper.OnScreenShotListener() {
                     @Override
                     public void onFinish(Bitmap bitmap) {
-                        mImageView.setImageBitmap(bitmap);
                         saveImageToGallery(bitmap);
                     }
                 });
-                screenShotHelper.startScreenShot();
+                ScreenShotApp.getInstance().setScreenShotHelper(screenShotHelper);
+                ScreenShotJobIntentService.enqueueWork(getApplicationContext(), new Intent());
             }
         }
     }
@@ -101,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(savedImageURL);
             Uri uri = Uri.parse(savedImageURL);
             if (uri != null) {
-//                out = getContentResolver().openOutputStream(uri);
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
             }
 
