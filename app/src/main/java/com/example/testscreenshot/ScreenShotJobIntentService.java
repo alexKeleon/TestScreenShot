@@ -32,25 +32,33 @@ public class ScreenShotJobIntentService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.i("screenshot", "截图: " + new Date().
-                toString());
-        try {
-            if (ScreenShotApp.getInstance().getScreenShotHelper() != null) {
-                ScreenShotApp.getInstance().getScreenShotHelper().doScreenShot();
-            } else {
-                Log.i("screenshot", "instance not ready....");
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                Log.i("screenshot", "截图: " + new Date().
+                        toString());
+                try {
+                    if (ScreenShotApp.getInstance().getScreenShotHelper() != null) {
+                        ScreenShotApp.getInstance().getScreenShotHelper().doScreenShot();
+                    } else {
+                        Log.i("screenshot", "instance not ready....");
+                    }
+                } catch (Exception e) {
+                    Log.e("screenshot error", "run: shot", e);
+                }
+                Log.i("screenshot", "Completed service " + new Date().
+                        toString());
             }
-        } catch (Exception e) {
-            Log.e("screenshot error", "run: shot", e);
-        }
-        Log.i("screenshot", "Completed service @ " + SystemClock.elapsedRealtime());
+        }).start();
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        int five = 3000; // 3s
+        int five = 100; // 3s
         long triggerAtTime = SystemClock.elapsedRealtime() + five;
+        Log.i("screenshot", "next shot time is" + triggerAtTime);
         Intent i = new Intent(this, AlarmReceiver.class);
         PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
 
-        manager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
+        manager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
 
     }
 }

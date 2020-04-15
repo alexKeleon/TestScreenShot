@@ -100,8 +100,6 @@ public class ScreenShotHelper {
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
             mVirtualDisplay.release();
-            mMediaProjection.stop();
-
             if (mOnScreenShotListener != null) {
                 mOnScreenShotListener.onFinish(bitmap);
             }
