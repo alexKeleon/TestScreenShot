@@ -52,13 +52,12 @@ public class ScreenShotJobIntentService extends JobIntentService {
             }
         }).start();
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        int five = 100; // 3s
+        int five = 1000; // 1s
         long triggerAtTime = SystemClock.elapsedRealtime() + five;
         Log.i("screenshot", "next shot time is" + triggerAtTime);
         Intent i = new Intent(this, AlarmReceiver.class);
         PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
 
         manager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
-
     }
 }

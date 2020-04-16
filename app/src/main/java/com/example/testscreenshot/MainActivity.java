@@ -17,11 +17,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static int REQUEST_MEDIA_PROJECTION = 0;
 
+    private static int REQUEST_MANAGE_SETTINGS = 1;
+
     private Button mBtn;
     private ImageView mImageView;
 
@@ -48,13 +53,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        requestWriteSettings();
         try2StartScreenShot();
     }
 
     private void try2StartScreenShot() {
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+    }
+
+    private void requestWriteSettings() {
+        if (!Settings.System.canWrite(getApplicationContext())) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQUEST_MANAGE_SETTINGS);
+        }
+
     }
 
     @Override
@@ -72,6 +86,16 @@ public class MainActivity extends AppCompatActivity {
                 ScreenShotJobIntentService.enqueueWork(getApplicationContext(), new Intent());
             }
         }
+        if (requestCode == REQUEST_MANAGE_SETTINGS) {
+            if (resultCode == RESULT_OK && data != null) {
+                if (Settings.System.canWrite(MainActivity.this)) {
+                    Log.i("screen bright", "onActivityResult: yes");
+                    Toast.makeText(MainActivity.this, "同意修改系统配置", Toast.LENGTH_LONG).show();
+                } else {
+                    Log.i("screen bright", "onActivityResult: no");
+                }
+            }
+        }
     }
 
     public void saveImageToGallery(Bitmap bitmap) {
@@ -80,10 +104,12 @@ public class MainActivity extends AppCompatActivity {
             mPicDir.mkdirs();
             String fileName = "screen_shot" + System.currentTimeMillis();
             String savedImageURL = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, "xxx");
-            System.out.println(savedImageURL);
             Uri uri = Uri.parse(savedImageURL);
             if (uri != null) {
                 sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+            }
+            if (Settings.System.canWrite(MainActivity.this)) {
+                Settings.System.putInt(getApplicationContext().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
             }
 
         } catch (Exception e) {
