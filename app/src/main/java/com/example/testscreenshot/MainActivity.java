@@ -18,11 +18,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.testscreenshot.util.ShellUtils;
+import com.shine.utilitylib.A64Utility;
 
 import java.io.File;
 import java.io.IOException;
@@ -124,9 +122,12 @@ public class MainActivity extends AppCompatActivity {
 //                policyManager.lockNow();
 //            }
             //goToSleep(getApplicationContext());
+            Log.i("screenshot", "saveImageToGallery: EVENT_HAPPEN is: " + EVENT_HAPPEN);
             if (EVENT_HAPPEN > 0) {
-                ShellUtils.execCommand("input keyevent 26", false);
-                Log.i("screenshot", "saveImageToGallery: screen off keyevent 26 ");
+//                ShellUtils.execCommand("input keyevent 26", false);
+//                Log.i("screenshot", "saveImageToGallery: screen off keyevent 26 ");
+                new A64Utility().CloseScreen();
+                Log.i("screenshot", "saveImageToGallery: close screen ");
                 EVENT_HAPPEN = 0;
             }
 

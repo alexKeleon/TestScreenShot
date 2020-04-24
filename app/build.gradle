@@ -18,16 +18,24 @@ android {
             keyAlias "ShineSign"
             keyPassword "shinestb"
         }
+
+        cpu_a64 {
+            storeFile file("shine_a64.jks")
+            storePassword "shineAndroid"
+            keyAlias "shineAndroid"
+            keyPassword "shineAndroid"
+        }
+
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.a64
+            signingConfig signingConfigs.cpu_a64
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.a64
+            signingConfig signingConfigs.cpu_a64
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
