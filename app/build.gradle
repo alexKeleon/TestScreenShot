@@ -10,12 +10,30 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        a64 {
+            storeFile file("ShineSign.jks")
+            storePassword "shinestb"
+            keyAlias "ShineSign"
+            keyPassword "shinestb"
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.a64
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.a64
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+
 }
 
 dependencies {

@@ -13,6 +13,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Log;
 
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
@@ -51,6 +52,7 @@ public class ScreenShotHelper {
     }
 
     public void doScreenShot() throws InterruptedException {
+
         createVirtualDisplay();
         Thread.sleep(2000);
         Image image = mImageReader.acquireLatestImage();
@@ -66,6 +68,7 @@ public class ScreenShotHelper {
         Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
         bitmap.copyPixelsFromBuffer(buffer);
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height);
+        Log.i("screenshot", "doScreenShot bitmap bytecount is: " + bitmap.getByteCount() );
         image.close();
         mVirtualDisplay.release();
         if (mOnScreenShotListener != null) {

@@ -40,6 +40,7 @@ public class ScreenShotJobIntentService extends JobIntentService {
                         toString());
                 try {
                     if (ScreenShotApp.getInstance().getScreenShotHelper() != null) {
+                        //todo 监听Intent.ACTION_SCREEN_OFF ，如果锁屏了，就不截屏了
                         ScreenShotApp.getInstance().getScreenShotHelper().doScreenShot();
                     } else {
                         Log.i("screenshot", "instance not ready....");
