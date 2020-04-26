@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.testscreenshot"
+    package="com.deepctrl.monitor.screenshot"
     android:sharedUserId="android.uid.system">
 
     <application
-        android:name=".ScreenShotApp"
+        android:name="com.deepctrl.monitor.screenshot.ScreenShotApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.deepctrl.monitor.screenshot.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,11 +20,11 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ScreenShotJobIntentService"
+        <service android:name="com.deepctrl.monitor.screenshot.ScreenShotJobIntentService"
         android:permission="android.permission.BIND_JOB_SERVICE"
         android:exported="true"/>
 
-        <receiver android:name=".AlarmReceiver"/>
+        <receiver android:name="com.deepctrl.monitor.screenshot.AlarmReceiver"/>
 
 <!--        <receiver-->
 <!--            android:name=".ScreenOffAdminReceiver"-->

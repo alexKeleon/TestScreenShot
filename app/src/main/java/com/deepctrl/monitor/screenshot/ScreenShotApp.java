@@ -1,12 +1,7 @@
-package com.example.testscreenshot;
+package com.deepctrl.monitor.screenshot;
 
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
 import android.app.Application;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.PowerManager;
-import android.os.SystemClock;
 
 public class ScreenShotApp extends Application {
     private ScreenShotHelper screenShotHelper;

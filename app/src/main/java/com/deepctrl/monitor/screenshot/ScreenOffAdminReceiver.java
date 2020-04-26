@@ -1,4 +1,4 @@
-package com.example.testscreenshot;
+package com.deepctrl.monitor.screenshot;
 
 import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;

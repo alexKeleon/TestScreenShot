@@ -1,4 +1,4 @@
-package com.example.testscreenshot;
+package com.deepctrl.monitor.screenshot;
 
 import org.junit.Test;
 

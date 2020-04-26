@@ -1,4 +1,4 @@
-package com.example.testscreenshot;
+package com.deepctrl.monitor.screenshot;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,8 +15,6 @@ import android.util.Log;
 import android.view.Window;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Date;
 
 public class ScreenShotActivity extends Activity {
