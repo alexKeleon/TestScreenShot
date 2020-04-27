@@ -1,4 +1,4 @@
-package com.deepctrl.monitor.screenshot.util;
+package com.shine.util;
 
 import android.util.Log;
 

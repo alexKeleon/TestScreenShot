@@ -9,6 +9,7 @@ import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.MediaStore;
@@ -20,32 +21,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.shine.utilitylib.A64Utility;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
+import com.deepctrl.monitor.screenshot.handler.ShotHandler;
+import com.deepctrl.monitor.screenshot.tcpclient.Connection;
 
 public class MainActivity extends AppCompatActivity {
-    /**
-     * 事件发生
-     */
-    private static int EVENT_HAPPEN = 1;
 
     private static int REQUEST_MEDIA_PROJECTION = 0;
 
     private static int REQUEST_MANAGE_SETTINGS = 1;
 
-    public static final String PIC_DIR_NAME = "myPhotos"; //在系统的图片文件夹下创建了一个相册文件夹，名为“myPhotos"，所有的图片都保存在该文件夹下。
-
-    private File mPicDir = new File(Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES), PIC_DIR_NAME); //图片统一保存在系统的图片文件夹中
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //todo 弹窗体填写ip和端口号的弹窗
+        new Thread(Connection.network).start();
         requestWriteMedia();
         try2StartScreenShot();
         requestWriteSettings();
@@ -77,13 +67,16 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_MEDIA_PROJECTION) {
             if (resultCode == RESULT_OK && data != null) {
+                //注册截图后的处理函数
                 ScreenShotHelper screenShotHelper = new ScreenShotHelper(MainActivity.this, resultCode, data, new ScreenShotHelper.OnScreenShotListener() {
                     @Override
                     public void onFinish(Bitmap bitmap) {
-                        saveImageToGallery(bitmap);
+                        //ShotHandler.saveImageToGallery(bitmap, MainActivity.this);
+                        ShotHandler.sendImage2AICenter(bitmap, MainActivity.this);
                     }
                 });
                 ScreenShotApp.getInstance().setScreenShotHelper(screenShotHelper);
+                //启动job
                 ScreenShotJobIntentService.enqueueWork(getApplicationContext(), new Intent());
             }
         }
@@ -96,84 +89,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("screen bright", "onActivityResult: no");
                 }
             }
-        }
-    }
-
-    public void saveImageToGallery(Bitmap bitmap) {
-        OutputStream out = null;
-        try {
-            mPicDir.mkdirs();
-            String fileName = "screen_shot" + System.currentTimeMillis();
-            String savedImageURL = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, "xxx");
-            Log.i("screenshot", "saveImageToGallery image url is :" + savedImageURL);
-            Uri uri = Uri.parse(savedImageURL);
-            if (uri != null) {
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
-            }
-            //设置屏幕亮度到最暗
-//            if (Settings.System.canWrite(MainActivity.this)) {
-//                Settings.System.putInt(getApplicationContext().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
-//            }
-            //熄灭屏幕
-//            DevicePolicyManager policyManager = (DevicePolicyManager) getApplicationContext()
-//                    .getSystemService(Context.DEVICE_POLICY_SERVICE);
-//            ComponentName adminReceiver = new ComponentName(MainActivity.this, ScreenOffAdminReceiver.class);
-//            if (policyManager.isAdminActive(adminReceiver)) {
-//                policyManager.lockNow();
-//            }
-            //goToSleep(getApplicationContext());
-            Log.i("screenshot", "saveImageToGallery: EVENT_HAPPEN is: " + EVENT_HAPPEN);
-            if (EVENT_HAPPEN > 0) {
-//                ShellUtils.execCommand("input keyevent 26", false);
-//                Log.i("screenshot", "saveImageToGallery: screen off keyevent 26 ");
-                new A64Utility().CloseScreen();
-                Log.i("screenshot", "saveImageToGallery: close screen ");
-                EVENT_HAPPEN = 0;
-            }
-
-        } catch (Exception e) {
-            Log.e("screenshot", "saveImageToGallery: ", e);
-        } finally {
-            if (out != null) {
-                try {
-                    out.flush();
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /**
-     *   关闭屏幕 ，其实是使系统休眠
-     *
-     */
-    public static void goToSleep(Context context) {
-        PowerManager powerManager= (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        try {
-            powerManager.getClass().getMethod("goToSleep", new Class[]{long.class}).invoke(powerManager, SystemClock.uptimeMillis());
-        } catch (Exception e) {
-            Log.e("screenshot", "goToSleep: ", e);
-        }
-    }
-
-
-
-    /**
-     * 唤醒屏幕
-     * @param context
-     */
-    public static void wakeUp(Context context) {
-        PowerManager powerManager= (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        try {
-            powerManager.getClass().getMethod("wakeUp", new Class[]{long.class}).invoke(powerManager, SystemClock.uptimeMillis());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
         }
     }
 

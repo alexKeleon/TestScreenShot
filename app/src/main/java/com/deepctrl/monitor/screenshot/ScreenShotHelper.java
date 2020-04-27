@@ -67,7 +67,7 @@ public class ScreenShotHelper {
         int rowPadding = rowStride - pixelStride * width;
         Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
         bitmap.copyPixelsFromBuffer(buffer);
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height);
+        //bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height);
         Log.i("screenshot", "doScreenShot bitmap bytecount is: " + bitmap.getByteCount() );
         image.close();
         mVirtualDisplay.release();
