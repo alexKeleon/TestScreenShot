@@ -8,11 +8,6 @@ import android.graphics.Bitmap;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.PowerManager;
-import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -22,7 +17,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.deepctrl.monitor.screenshot.handler.ShotHandler;
-import com.deepctrl.monitor.screenshot.tcpclient.Connection;
+import com.deepctrl.monitor.screenshot.tcpclient.TcpConnector;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +30,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //todo 弹窗体填写ip和端口号的弹窗
-        new Thread(Connection.network).start();
+        TcpConnector.getINSTANCE().createConnection("192.168.1.33", 3000);
+        TcpConnector.getINSTANCE().setOnDataArriveListener(new TcpConnector.DataArriveListener() {
+            @Override
+            public void onReceiveData(byte[] data) {
+                ShotHandler.processAIControl(data);
+            }
+        });
         requestWriteMedia();
         try2StartScreenShot();
         requestWriteSettings();

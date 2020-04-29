@@ -9,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
+import com.deepctrl.monitor.screenshot.tcpclient.TcpConnector;
+
 import java.util.Date;
 
 public class ScreenShotJobIntentService extends JobIntentService {
@@ -19,15 +21,6 @@ public class ScreenShotJobIntentService extends JobIntentService {
         enqueueWork(context, ScreenShotJobIntentService.class, JOB_ID, work);
     }
 
-//    @Override
-//    public void onCreate() {
-//        super.onCreate();
-//        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-//        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-//                "ScreenShotApp:myWakeLock");
-//        wakeLock.acquire();
-//    }
-
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         new Thread(new Runnable() {
@@ -37,7 +30,8 @@ public class ScreenShotJobIntentService extends JobIntentService {
                 Log.i("screenshot", "截图: " + new Date().
                         toString());
                 try {
-                    if (ScreenShotApp.getInstance().getScreenShotHelper() != null) {
+                    if (ScreenShotApp.getInstance().getScreenShotHelper() != null &&
+                            TcpConnector.getINSTANCE().isConnected()) {
                         ScreenShotApp.getInstance().getScreenShotHelper().doScreenShot();
                     } else {
                         Log.i("screenshot", "instance not ready....");
@@ -50,8 +44,7 @@ public class ScreenShotJobIntentService extends JobIntentService {
             }
         }).start();
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        int five = 1000; // 1s
-        long triggerAtTime = SystemClock.elapsedRealtime() + five;
+        long triggerAtTime = SystemClock.elapsedRealtime() + Constants.SHOT_TIME;
         Log.i("screenshot", "next shot time is" + triggerAtTime);
         Intent i = new Intent(this, AlarmReceiver.class);
         PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);

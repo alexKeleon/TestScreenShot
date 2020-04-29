@@ -1,6 +1,5 @@
 package com.deepctrl.monitor.screenshot.handler;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -10,7 +9,10 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.deepctrl.monitor.screenshot.tcpclient.Connection;
+import com.deepctrl.monitor.screenshot.Constants;
+import com.deepctrl.monitor.screenshot.Screen;
+import com.deepctrl.monitor.screenshot.tcpclient.TcpConnector;
+import com.deepctrl.monitor.screenshot.util.ByteUtil;
 import com.deepctrl.monitor.screenshot.util.Command;
 import com.deepctrl.monitor.screenshot.util.ImageProcessor;
 import com.deepctrl.monitor.screenshot.util.NetUtil;
@@ -46,20 +48,6 @@ public class ShotHandler {
             if (uri != null) {
                 contextWrapper.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
             }
-            //设置屏幕亮度到最暗
-//            if (Settings.System.canWrite(MainActivity.this)) {
-//                Settings.System.putInt(getApplicationContext().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
-//            }
-            //熄灭屏幕
-            Log.i("screenshot", "saveImageToGallery: EVENT_HAPPEN is: " + EVENT_HAPPEN);
-            if (EVENT_HAPPEN > 0) {
-//                ShellUtils.execCommand("input keyevent 26", false);
-//                Log.i("screenshot", "saveImageToGallery: screen off keyevent 26 ");
-                new A64Utility().CloseScreen();
-                Log.i("screenshot", "saveImageToGallery: close screen ");
-                EVENT_HAPPEN = 0;
-            }
-
         } catch (Exception e) {
             Log.e("screenshot", "saveImageToGallery: ", e);
         } finally {
@@ -74,15 +62,29 @@ public class ShotHandler {
         }
     }
 
-
     public static void sendImage2AICenter(Bitmap bitmap, Context context) {
         byte[] pngBytes = ImageProcessor.compress2png(bitmap);
         byte[] frame = Command.genFrame(NetUtil.fetchDeviceId(), pngBytes);
         short width = (short) SysUtil.getWindowWidth(context);
         short height = (short) SysUtil.getWindowHeight(context);
-        byte[] state = Command.genState(NetUtil.fetchDeviceId(), width, height, ScreenStatus.status);
-        Connection.getINSTANCE().sendData(frame);
-        Connection.getINSTANCE().sendData(state);
+        byte[] state = Command.genState(NetUtil.fetchDeviceId(), width, height, Screen.status);
+        TcpConnector.getINSTANCE().send(state);
+        TcpConnector.getINSTANCE().send(frame);
+        Log.i("screenshot-tcp", "frame size is: " + frame.length);
 
+    }
+
+    public static void processAIControl(byte[] data) {
+        byte toggle = Command.analysisRevData(data);
+        if (toggle == Constants.SCREEN_OPEN) {
+            if (Screen.status == Constants.SCREEN_CLOSE) {
+                new A64Utility().OpenScreen();
+            }
+        } else if (toggle == Constants.SCREEN_CLOSE) {
+            if (Screen.status == Constants.SCREEN_OPEN) {
+                //关闭屏幕
+                new A64Utility().CloseScreen();
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ public class ImageProcessor {
         matrix.postScale(scaleWidth, scaleHeight);
         Bitmap smallBm = Bitmap.createBitmap(bitmap,0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        smallBm.compress(Bitmap.CompressFormat.PNG, 90, out);
+        smallBm.compress(Bitmap.CompressFormat.PNG, 100, out);
         return out.toByteArray();
     }
 }

@@ -1,19 +1,17 @@
 package com.deepctrl.monitor.screenshot.util;
 
-import android.content.Intent;
-
-import com.deepctrl.monitor.screenshot.util.CRC32;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 
 public class Command {
-    public static  byte STATE = 0x33;
+    private static  byte STATE = 0x33;
 
-    public static  byte FRAME = 0x34;
+    private static  byte FRAME = 0x34;
 
-    public static  byte CONTROL = (byte) 0xB4;
+    private static  byte CONTROL = (byte) 0xB4;
 
-    public static byte[] header = {(byte)0xAA, (byte)0xBB, (byte)0xCC, (byte)0xDD};
+    private static byte[] header = {(byte)0xAA, (byte)0xBB, (byte)0xCC, (byte)0xDD};
 
     private static byte[] genCommandData(byte command, byte[] data) {
         //计算帧长
@@ -22,10 +20,8 @@ public class Command {
                 .put(header).put(command).putInt(dataLen).put(data).array();
         //计算crc32
         int crc = CRC32.genCRC32(bytes);
-        byte[] crcBytes = ByteBuffer.allocate(dataLen)
-                .put(header).put(command).putInt(dataLen).put(data).array();
-
-        return crcBytes;
+        return ByteBuffer.allocate(dataLen)
+                .put(header).put(command).putInt(dataLen).put(data).putInt(crc).array();
     }
 
     /**
@@ -52,7 +48,24 @@ public class Command {
         return genCommandData(STATE, data);
     }
 
-    public static int analysisControl(byte[] data) {
-        return 0;
+    /**
+     * 解析客户端接收的control指令
+     * @param data
+     * @return 0-开屏，1-关屏
+     */
+    public static byte analysisRevData(byte[] data) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+        int header = byteBuffer.getInt(0);
+        if (header != (int)0xAABBCCDD) {
+            Log.i("screen-shot tcp", "analysisRevData: header有问题");
+            return -1;
+        }
+        if (byteBuffer.get(4) != CONTROL) {
+            Log.i("screen-shot tcp", "analysisRevData: 非法指令" + byteBuffer.get(4));
+            return -1;
+        }
+
+        byte state = byteBuffer.get(9);
+        return state;
     }
 }
