@@ -79,11 +79,13 @@ public class ShotHandler {
         if (toggle == Constants.SCREEN_OPEN) {
             if (Screen.status == Constants.SCREEN_CLOSE) {
                 new A64Utility().OpenScreen();
+                Screen.status = Constants.SCREEN_OPEN;
             }
         } else if (toggle == Constants.SCREEN_CLOSE) {
             if (Screen.status == Constants.SCREEN_OPEN) {
                 //关闭屏幕
                 new A64Utility().CloseScreen();
+                Screen.status = Constants.SCREEN_CLOSE;
             }
         }
     }

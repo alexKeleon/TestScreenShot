@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -14,6 +16,8 @@ import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
+
+import com.deepctrl.monitor.screenshot.util.ImageProcessor;
 
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
@@ -52,28 +56,41 @@ public class ScreenShotHelper {
     }
 
     public void doScreenShot() throws InterruptedException {
-
-        createVirtualDisplay();
-        Thread.sleep(2000);
-        Image image = mImageReader.acquireLatestImage();
-        int width = image.getWidth();
-        int height = image.getHeight();
-        final Image.Plane[] planes = image.getPlanes();
-        final ByteBuffer buffer = planes[0].getBuffer();
-
-        int pixelStride = planes[0].getPixelStride();
-
-        int rowStride = planes[0].getRowStride();
-        int rowPadding = rowStride - pixelStride * width;
-        Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
-        bitmap.copyPixelsFromBuffer(buffer);
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height);
-        Log.i("screenshot", "doScreenShot bitmap bytecount is: " + bitmap.getByteCount() );
-        image.close();
-        mVirtualDisplay.release();
-        if (mOnScreenShotListener != null) {
+        Image image = null;
+        try {
+            createVirtualDisplay();
+            Thread.sleep(2000);
+            image = mImageReader.acquireLatestImage();
+            int width = image.getWidth();
+            int height = image.getHeight();
+            final Image.Plane[] planes = image.getPlanes();
+            final ByteBuffer buffer = planes[0].getBuffer();
+//            byte[] byteArr = new byte[buffer.remaining()];
+//            buffer.get(byteArr);
+            //Log.i("screenshot", "doScreenShot buffer length is: " + byteArr.length);
+            int pixelStride = planes[0].getPixelStride();
+            int rowStride = planes[0].getRowStride();
+            int rowPadding = rowStride - pixelStride * width;
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.outWidth = width;
+            options.outHeight = height;
+            options.inSampleSize = ImageProcessor.calculateInSampleSize(options);
+            //Bitmap bitmap = BitmapFactory.decodeByteArray(byteArr, 0, byteArr.length);
+            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+            bitmap.copyPixelsFromBuffer(buffer);
+            Log.i("screenshot", "doScreenShot bitmap bytecount is: " + bitmap.getByteCount() );
+            if (mOnScreenShotListener != null) {
             mOnScreenShotListener.onFinish(bitmap);
+            }
+        } catch (Exception e) {
+            Log.e("screenshot", "doScreenShot", e);
+        } finally {
+            if (image != null) {
+                image.close();
+            }
+            mVirtualDisplay.release();
         }
+
     }
 
 

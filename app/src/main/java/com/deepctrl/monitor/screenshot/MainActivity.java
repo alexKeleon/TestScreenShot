@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.deepctrl.monitor.screenshot.handler.ShotHandler;
 import com.deepctrl.monitor.screenshot.tcpclient.TcpConnector;
+import com.shine.utilitylib.A64Utility;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new A64Utility().OpenScreen();
         //todo 弹窗体填写ip和端口号的弹窗
         TcpConnector.getINSTANCE().createConnection("192.168.1.33", 3000);
         TcpConnector.getINSTANCE().setOnDataArriveListener(new TcpConnector.DataArriveListener() {

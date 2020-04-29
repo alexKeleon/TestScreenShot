@@ -5,13 +5,13 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 
 public class Command {
-    private static  byte STATE = 0x33;
+    private static  final byte STATE = 0x34;
 
-    private static  byte FRAME = 0x34;
+    private static  final byte FRAME = 0x35;
 
-    private static  byte CONTROL = (byte) 0xB4;
+    private static  final byte CONTROL = (byte) 0xB4;
 
-    private static byte[] header = {(byte)0xAA, (byte)0xBB, (byte)0xCC, (byte)0xDD};
+    private static final byte[] header = {(byte)0xAA, (byte)0xBB, (byte)0xCC, (byte)0xDD};
 
     private static byte[] genCommandData(byte command, byte[] data) {
         //计算帧长
@@ -66,6 +66,7 @@ public class Command {
         }
 
         byte state = byteBuffer.get(9);
+        Log.i("screen-shot tcp", "analysisRevData: control is" + state);
         return state;
     }
 }

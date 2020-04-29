@@ -23,26 +23,22 @@ public class ScreenShotJobIntentService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        new Thread(new Runnable() {
 
-            @Override
-            public void run() {
-                Log.i("screenshot", "截图: " + new Date().
-                        toString());
-                try {
-                    if (ScreenShotApp.getInstance().getScreenShotHelper() != null &&
-                            TcpConnector.getINSTANCE().isConnected()) {
-                        ScreenShotApp.getInstance().getScreenShotHelper().doScreenShot();
-                    } else {
-                        Log.i("screenshot", "instance not ready....");
-                    }
-                } catch (Exception e) {
-                    Log.e("screenshot error", "run: shot", e);
-                }
-                Log.i("screenshot", "Completed service " + new Date().
-                        toString());
+        Log.i("screenshot", "截图: " + new Date().
+                toString());
+        try {
+            if (ScreenShotApp.getInstance().getScreenShotHelper() != null &&
+                    TcpConnector.getINSTANCE().isConnected()) {
+                ScreenShotApp.getInstance().getScreenShotHelper().doScreenShot();
+            } else {
+                Log.i("screenshot", "instance not ready....");
             }
-        }).start();
+        } catch (Exception e) {
+            Log.e("screenshot error", "run: shot", e);
+        }
+        Log.i("screenshot", "Completed service " + new Date().
+                toString());
+
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
         long triggerAtTime = SystemClock.elapsedRealtime() + Constants.SHOT_TIME;
         Log.i("screenshot", "next shot time is" + triggerAtTime);
