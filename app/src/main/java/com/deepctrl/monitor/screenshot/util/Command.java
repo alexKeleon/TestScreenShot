@@ -2,7 +2,9 @@ package com.deepctrl.monitor.screenshot.util;
 
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Command {
     private static  final byte STATE = 0x34;
@@ -12,6 +14,14 @@ public class Command {
     private static  final byte CONTROL = (byte) 0xB4;
 
     private static final byte[] header = {(byte)0xAA, (byte)0xBB, (byte)0xCC, (byte)0xDD};
+
+
+    /**
+     * 这个值可能需要调整
+     */
+    //private static byte[] pngBytes = new byte[1000000];
+
+    //private static
 
     private static byte[] genCommandData(byte command, byte[] data) {
         //计算帧长
@@ -29,16 +39,19 @@ public class Command {
      * unsigned int to int
      * 超过int + 范围的数字，只要在4个字节内（不管有符号无符号）
      * @param id
-     * @param pic
+     * @param pngOut
      * @return
      */
-    public static byte[] genFrame(byte[] id, byte[] pic) {
+    public static byte[] genFrame(byte[] id, byte[] pngBytes) {
+//        int picLen = pngOut.size();
+//        Arrays.fill(pngBytes, (byte)0);
+//        pngOut.write(pngBytes, 0, picLen);
         long now = System.currentTimeMillis();
         int mtime = (int)(now / 1000);
         short stime = (short)(now % 1000);
-        int length = 8 + 4 + 2 + pic.length;
+        int length = 8 + 4 + 2 + pngBytes.length;
         byte[] data = ByteBuffer.allocate(length)
-                .put(id).putInt(mtime).putShort(stime).put(pic).array();
+                .put(id).putInt(mtime).putShort(stime).put(pngBytes).array();
         return genCommandData(FRAME, data);
     }
 

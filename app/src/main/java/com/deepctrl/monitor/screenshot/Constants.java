@@ -10,4 +10,11 @@ public class Constants {
 
     public static final byte SCREEN_CLOSE = 0x01;
 
+
+    /**
+     * 日志tag
+     */
+    public static final String TAG_PERF = "screenshot-perf";
+
+    public static final String TAG_TCP = "screenshot-tcp";
 }

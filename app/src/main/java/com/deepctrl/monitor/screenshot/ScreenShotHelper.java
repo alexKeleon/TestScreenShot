@@ -34,13 +34,17 @@ public class ScreenShotHelper {
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
     private final SoftReference<Context> mRefContext;
+    private Bitmap bitmap;
 
     public ScreenShotHelper(Context context, int resultCode, Intent data, OnScreenShotListener onScreenShotListener) {
         this.mOnScreenShotListener = onScreenShotListener;
         this.mRefContext = new SoftReference<Context>(context);
 
         mMediaProjection = getMediaProjectionManager().getMediaProjection(resultCode, data);
-        mImageReader = ImageReader.newInstance(getScreenWidth(), getScreenHeight(), PixelFormat.RGBA_8888, 1);
+        mImageReader = ImageReader.newInstance(getScreenWidth(), getScreenHeight(), PixelFormat.RGBA_8888, 2);
+        createVirtualDisplay();
+        //分配固定内存
+        bitmap = Bitmap.createBitmap(getScreenWidth(), getScreenHeight(), Bitmap.Config.ARGB_8888);
     }
 
     public void startScreenShot() {
@@ -58,9 +62,13 @@ public class ScreenShotHelper {
     public void doScreenShot() throws InterruptedException {
         Image image = null;
         try {
-            createVirtualDisplay();
-            Thread.sleep(2000);
+            if (mVirtualDisplay == null) {
+                return;
+            }
             image = mImageReader.acquireLatestImage();
+            if (image == null) {
+                return;
+            }
             int width = image.getWidth();
             int height = image.getHeight();
             final Image.Plane[] planes = image.getPlanes();
@@ -71,16 +79,20 @@ public class ScreenShotHelper {
             int pixelStride = planes[0].getPixelStride();
             int rowStride = planes[0].getRowStride();
             int rowPadding = rowStride - pixelStride * width;
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.outWidth = width;
-            options.outHeight = height;
-            options.inSampleSize = ImageProcessor.calculateInSampleSize(options);
-            //Bitmap bitmap = BitmapFactory.decodeByteArray(byteArr, 0, byteArr.length);
-            Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            options.outWidth = width;
+//            options.outHeight = height;
+//            options.inJustDecodeBounds =false;
+//            options.inPreferredConfig = Bitmap.Config.RGB_565;
+//            options.inDither = true;
+//            options.inSampleSize = ImageProcessor.getINSTANCE().calculateInSampleSize(options);
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(byteArr, 0, byteArr.length, options);
+
+            //Bitmap bitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
             bitmap.copyPixelsFromBuffer(buffer);
             Log.i("screenshot", "doScreenShot bitmap bytecount is: " + bitmap.getByteCount() );
             if (mOnScreenShotListener != null) {
-            mOnScreenShotListener.onFinish(bitmap);
+                mOnScreenShotListener.onFinish(bitmap);
             }
         } catch (Exception e) {
             Log.e("screenshot", "doScreenShot", e);
@@ -88,7 +100,6 @@ public class ScreenShotHelper {
             if (image != null) {
                 image.close();
             }
-            mVirtualDisplay.release();
         }
 
     }

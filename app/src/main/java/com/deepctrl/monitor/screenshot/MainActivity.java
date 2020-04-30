@@ -57,11 +57,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestWriteSettings() {
-        if (!Settings.System.canWrite(getApplicationContext())) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, REQUEST_MANAGE_SETTINGS);
-        }
+//        if (!Settings.System.canWrite(getApplicationContext())) {
+//            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+//            intent.setData(Uri.parse("package:" + getPackageName()));
+//            startActivityForResult(intent, REQUEST_MANAGE_SETTINGS);
+//        }
 
     }
 
@@ -85,12 +85,12 @@ public class MainActivity extends AppCompatActivity {
         }
         if (requestCode == REQUEST_MANAGE_SETTINGS) {
             if (resultCode == RESULT_OK && data != null) {
-                if (Settings.System.canWrite(MainActivity.this)) {
-                    Log.i("screen bright", "onActivityResult: yes");
-                    Toast.makeText(MainActivity.this, "同意修改系统配置", Toast.LENGTH_LONG).show();
-                } else {
-                    Log.i("screen bright", "onActivityResult: no");
-                }
+//                if (Settings.System.canWrite(MainActivity.this)) {
+//                    Log.i("screen bright", "onActivityResult: yes");
+//                    Toast.makeText(MainActivity.this, "同意修改系统配置", Toast.LENGTH_LONG).show();
+//                } else {
+//                    Log.i("screen bright", "onActivityResult: no");
+//                }
             }
         }
     }

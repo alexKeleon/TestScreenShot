@@ -28,6 +28,8 @@ public class TcpConnector {
 
     private Thread connectThread;
 
+    private Thread connectCheckThread;
+
     private Handler aiMessageHandler = new AIMessageHandler();
 
     private static class AIMessageHandler extends Handler {
@@ -75,6 +77,23 @@ public class TcpConnector {
             }
         });
         connectThread.start();
+        //socket连接检查线程
+//        connectCheckThread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                while (true) {
+//                    try {
+//                        if (socket != null && socket.isClosed()) {
+//                            connect();
+//                        }
+//                        Thread.sleep(1000);
+//                    } catch (Exception e) {
+//                        Log.e("screen-shot-tcp", "run: ", e);
+//                    }
+//                }
+//            }
+//        });
+//        connectCheckThread.setName("connect-check-thread");
     }
 
     /**
@@ -91,7 +110,7 @@ public class TcpConnector {
                 return;
             }
             socket = new Socket(ip, port);
-
+            Log.i("screen-shot-tcp", "connect: success" + socket.getLocalAddress() + ":" + socket.getLocalPort());
             InputStream inputStream = socket.getInputStream();
             byte[] buffer = new byte[1024];
             int len = -1;
@@ -139,10 +158,17 @@ public class TcpConnector {
         try {
             if (socket.isConnected()) {
                 socket.getOutputStream().write(data);
-                Log.i("screenshot-tcp", " data is" + ByteUtil.bytesToHexStr(data));
             }
         } catch (IOException e) {
             Log.e("screenshot-tcp", "sendData: ", e);
+            try {
+                socket.close();
+                Log.i("screenshot-tcp", "client socket is closed");
+            } catch (IOException e1) {
+                Log.e("screenshot-tcp", "close connection error: ", e1);
+            }
+            //重新与服务端连接
+            connect();
         }
     }
 

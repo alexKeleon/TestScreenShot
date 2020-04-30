@@ -9,9 +9,13 @@ import java.util.Enumeration;
 
 public class NetUtil {
 
+    private static byte[] mac;
     public static byte[] fetchDeviceId() {
-        byte[] empty = {0x00, 0x00};
-        return ByteBuffer.allocate(8).put(empty).put(getMac()).array();
+        if (mac == null) {
+            byte[] empty = {0x00, 0x00};
+            mac = ByteBuffer.allocate(8).put(empty).put(getMac()).array();
+        }
+        return mac;
     }
 
     private static byte[] getMac() {

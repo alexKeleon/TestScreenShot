@@ -19,6 +19,7 @@ import com.deepctrl.monitor.screenshot.util.NetUtil;
 import com.deepctrl.monitor.screenshot.util.SysUtil;
 import com.shine.utilitylib.A64Utility;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -63,14 +64,14 @@ public class ShotHandler {
     }
 
     public static void sendImage2AICenter(Bitmap bitmap, Context context) {
-        byte[] pngBytes = ImageProcessor.compress2png(bitmap);
+        byte[] pngBytes = ImageProcessor.getINSTANCE().compress2png(bitmap);
         byte[] frame = Command.genFrame(NetUtil.fetchDeviceId(), pngBytes);
         short width = (short) SysUtil.getWindowWidth(context);
         short height = (short) SysUtil.getWindowHeight(context);
         byte[] state = Command.genState(NetUtil.fetchDeviceId(), width, height, Screen.status);
         TcpConnector.getINSTANCE().send(state);
         TcpConnector.getINSTANCE().send(frame);
-        Log.i("screenshot-tcp", "frame size is: " + frame.length);
+        Log.i("screenshot-tcp", "frame size is: " + frame.length + " screen status is" + Screen.status);
 
     }
 
