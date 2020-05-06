@@ -5,8 +5,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 
+import com.deepctrl.monitor.screenshot.entity.DCByteArrayOutputStream;
 import com.deepctrl.monitor.screenshot.entity.DCByteBuffer;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
@@ -23,7 +25,7 @@ public class ImageProcessor {
 
     private static final int HEIGHT = 540;
 
-    private ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private DCByteArrayOutputStream out = new DCByteArrayOutputStream();
 
     private Bitmap smallBm;
 
@@ -55,8 +57,7 @@ public class ImageProcessor {
         out.reset();
         smallBm.compress(Bitmap.CompressFormat.PNG, 100, out);
         int picLen = out.size();
-        Arrays.fill(pngBytes, (byte)0);
-        out.write(pngBytes, 0, picLen);
+        out.copyDataToMem(pngBytes);
         DCByteBuffer DCByteBuffer = new DCByteBuffer();
         DCByteBuffer.setLen(picLen);
         DCByteBuffer.setBytes(pngBytes);

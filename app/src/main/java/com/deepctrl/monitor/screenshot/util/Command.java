@@ -2,6 +2,7 @@ package com.deepctrl.monitor.screenshot.util;
 
 import android.util.Log;
 
+import com.deepctrl.monitor.screenshot.Constants;
 import com.deepctrl.monitor.screenshot.entity.DCByteBuffer;
 
 import java.nio.ByteBuffer;
@@ -35,7 +36,8 @@ public class Command {
         //dataLen - 4
         //计算crc32
         int crc = CRC32.genCRC32(commandByteBuff.array(), dataLen - 4);
-        dcByteBuffer.setBytes(commandByteBuff.putInt(crc).array());
+        byte[] comBytes = commandByteBuff.putInt(crc).array();
+        dcByteBuffer.setBytes(comBytes);
         dcByteBuffer.setLen(dataLen);
         return dcByteBuffer;
 }
@@ -45,20 +47,20 @@ public class Command {
      * unsigned int to int
      * 超过int + 范围的数字，只要在4个字节内（不管有符号无符号）
      * @param id
-     * @param DCByteBuffer
+     * @param dcByteBuffer
      * @return
      */
-    public static DCByteBuffer genFrame(byte[] id, DCByteBuffer DCByteBuffer) {
+    public static DCByteBuffer genFrame(byte[] id, DCByteBuffer dcByteBuffer) {
         frameByteBuff.clear();
         long now = System.currentTimeMillis();
         int mtime = (int)(now / 1000);
         short stime = (short)(now % 1000);
-        int length = 8 + 4 + 2 + DCByteBuffer.getLen();
+        int length = 8 + 4 + 2 + dcByteBuffer.getLen();
         ByteBuffer data = frameByteBuff
                 .put(id).putInt(mtime).putShort(stime);
         //取图片的有效字节
-        for (int i = 0; i < DCByteBuffer.getLen(); ++i) {
-            data.put(DCByteBuffer.getBytes()[i]);
+        for (int i = 0; i < dcByteBuffer.getLen(); ++i) {
+            data.put(dcByteBuffer.getBytes()[i]);
         }
         return genCommandData(FRAME, data, length);
     }

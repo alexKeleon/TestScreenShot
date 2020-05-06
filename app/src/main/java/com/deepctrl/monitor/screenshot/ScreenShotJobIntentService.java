@@ -48,7 +48,7 @@ public class ScreenShotJobIntentService extends JobIntentService {
                     Log.i("screenshot", "Completed service " + new Date().
                             toString());
                     try {
-                        sleep(1000);
+                        sleep(300);
                     } catch (Exception e) {
                         Log.e("screenshot error", "sleep: ", e);
                     }

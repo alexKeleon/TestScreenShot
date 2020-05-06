@@ -126,7 +126,7 @@ public class TcpConnector {
                 Log.i("screenshot-tcp", "data receive: " +  ByteUtil.bytesToHexStr(data));
             }
         } catch (Exception e) {
-            Log.e("screenshot-tcp", "connect or read: error", e);
+            Log.e("screenshot-tcp", "connect or read: error");
         }
 
     }
@@ -158,6 +158,7 @@ public class TcpConnector {
         try {
             if (socket.isConnected()) {
                 socket.getOutputStream().write(data, 0, len);
+                socket.getOutputStream().flush();
             }
         } catch (IOException e) {
             Log.e("screenshot-tcp", "sendData: ", e);

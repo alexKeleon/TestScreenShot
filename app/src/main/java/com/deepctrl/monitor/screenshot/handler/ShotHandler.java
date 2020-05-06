@@ -63,12 +63,13 @@ public class ShotHandler {
     }
 
     public static void sendImage2AICenter(Bitmap bitmap, Context context) {
-        DCByteBuffer DCByteBuffer = ImageProcessor.getINSTANCE().compress2png(bitmap);
-        DCByteBuffer frameByteBuff = Command.genFrame(NetUtil.fetchDeviceId(), DCByteBuffer);
         short width = (short) SysUtil.getWindowWidth(context);
         short height = (short) SysUtil.getWindowHeight(context);
         DCByteBuffer stateByteBuff = Command.genState(NetUtil.fetchDeviceId(), width, height, Screen.status);
         TcpConnector.getINSTANCE().send(stateByteBuff.getBytes(), stateByteBuff.getLen());
+
+        DCByteBuffer dcByteBuffer = ImageProcessor.getINSTANCE().compress2png(bitmap);
+        DCByteBuffer frameByteBuff = Command.genFrame(NetUtil.fetchDeviceId(), dcByteBuffer);
         TcpConnector.getINSTANCE().send(frameByteBuff.getBytes(), frameByteBuff.getLen());
         Log.i("screenshot-tcp", "frame size is: " + frameByteBuff.getLen() + " screen status is" + Screen.status);
 

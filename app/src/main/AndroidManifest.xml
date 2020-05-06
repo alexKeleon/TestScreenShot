@@ -26,22 +26,21 @@
 
         <receiver android:name="com.deepctrl.monitor.screenshot.AlarmReceiver"/>
 
-<!--        <receiver-->
-<!--            android:name=".ScreenOffAdminReceiver"-->
-<!--            android:label="@string/app_name"-->
-<!--            android:permission="android.permission.BIND_DEVICE_ADMIN" >-->
-<!--            <meta-data-->
-<!--                android:name="android.app.device_admin"-->
-<!--                android:resource="@xml/device_admin" />-->
 
-<!--            <intent-filter>-->
-<!--                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
+        <receiver android:name="BootBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+
 
 </manifest>

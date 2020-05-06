@@ -47,7 +47,6 @@ public class CRC32 {
      */
     public static int genCRC32(byte[] data, int len) {
         int crc = 0xFFFFFFFF;
-        System.out.println(crc);
         for (int i = 0; i < len; ++i) {
             byte c = data[i];
             crc = ((crc >>> 8) & 0x00FFFFFF) ^ crcTable[(crc ^ c) & 0xFF];

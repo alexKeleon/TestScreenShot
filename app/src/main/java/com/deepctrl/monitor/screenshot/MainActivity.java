@@ -39,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
                 ShotHandler.processAIControl(data);
             }
         });
-        requestWriteMedia();
+        //requestWriteMedia();
         try2StartScreenShot();
-        requestWriteSettings();
+        //requestWriteSettings();
     }
 
     private void requestWriteMedia() {
