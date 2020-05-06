@@ -154,10 +154,10 @@ public class TcpConnector {
      * 发送数据
      * @param data
      */
-    public void send(byte[] data) {
+    public void send(byte[] data, int len) {
         try {
             if (socket.isConnected()) {
-                socket.getOutputStream().write(data);
+                socket.getOutputStream().write(data, 0, len);
             }
         } catch (IOException e) {
             Log.e("screenshot-tcp", "sendData: ", e);

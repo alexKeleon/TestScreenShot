@@ -13,7 +13,7 @@ public class CRC32Test {
         try {
             byte[] bytes = rdn.getBytes("US-ASCII");
             System.out.println("para is " + Hex.encodeHexString(bytes));
-            int result = CRC32.genCRC32(bytes);
+            int result = CRC32.genCRC32(bytes, bytes.length);
             System.out.println("result is " + Integer.toHexString(result));
         } catch (Exception e) {
             e.printStackTrace();

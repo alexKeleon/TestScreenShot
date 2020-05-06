@@ -2,9 +2,9 @@ package com.deepctrl.monitor.screenshot.util;
 
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
+import com.deepctrl.monitor.screenshot.entity.DCByteBuffer;
+
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class Command {
     private static  final byte STATE = 0x34;
@@ -15,50 +15,59 @@ public class Command {
 
     private static final byte[] header = {(byte)0xAA, (byte)0xBB, (byte)0xCC, (byte)0xDD};
 
+    private static ByteBuffer sateByteBuff = ByteBuffer.allocate(13);
 
-    /**
-     * 这个值可能需要调整
-     */
-    //private static byte[] pngBytes = new byte[1000000];
+    private static ByteBuffer frameByteBuff = ByteBuffer.allocate(1000000);
 
-    //private static
+    private static ByteBuffer commandByteBuff = ByteBuffer.allocate(1000013);
 
-    private static byte[] genCommandData(byte command, byte[] data) {
+
+    private static DCByteBuffer genCommandData(byte command, ByteBuffer data, int buffLen) {
+
+        commandByteBuff.clear();
+        DCByteBuffer dcByteBuffer = new DCByteBuffer();
         //计算帧长
-        int dataLen = 13 + data.length;
-        byte[] bytes = ByteBuffer.allocate(dataLen - 4)
-                .put(header).put(command).putInt(dataLen).put(data).array();
+        int dataLen = 13 + buffLen;
+        commandByteBuff.put(header).put(command).putInt(dataLen);
+        for (int i = 0; i < buffLen; ++i) {
+            commandByteBuff.put(data.get(i));
+        }
+        //dataLen - 4
         //计算crc32
-        int crc = CRC32.genCRC32(bytes);
-        return ByteBuffer.allocate(dataLen)
-                .put(header).put(command).putInt(dataLen).put(data).putInt(crc).array();
-    }
+        int crc = CRC32.genCRC32(commandByteBuff.array(), dataLen - 4);
+        dcByteBuffer.setBytes(commandByteBuff.putInt(crc).array());
+        dcByteBuffer.setLen(dataLen);
+        return dcByteBuffer;
+}
 
     /**
      * id + 4 + 2 + pic
      * unsigned int to int
      * 超过int + 范围的数字，只要在4个字节内（不管有符号无符号）
      * @param id
-     * @param pngOut
+     * @param DCByteBuffer
      * @return
      */
-    public static byte[] genFrame(byte[] id, byte[] pngBytes) {
-//        int picLen = pngOut.size();
-//        Arrays.fill(pngBytes, (byte)0);
-//        pngOut.write(pngBytes, 0, picLen);
+    public static DCByteBuffer genFrame(byte[] id, DCByteBuffer DCByteBuffer) {
+        frameByteBuff.clear();
         long now = System.currentTimeMillis();
         int mtime = (int)(now / 1000);
         short stime = (short)(now % 1000);
-        int length = 8 + 4 + 2 + pngBytes.length;
-        byte[] data = ByteBuffer.allocate(length)
-                .put(id).putInt(mtime).putShort(stime).put(pngBytes).array();
-        return genCommandData(FRAME, data);
+        int length = 8 + 4 + 2 + DCByteBuffer.getLen();
+        ByteBuffer data = frameByteBuff
+                .put(id).putInt(mtime).putShort(stime);
+        //取图片的有效字节
+        for (int i = 0; i < DCByteBuffer.getLen(); ++i) {
+            data.put(DCByteBuffer.getBytes()[i]);
+        }
+        return genCommandData(FRAME, data, length);
     }
 
-    public static byte [] genState(byte[] id, short width, short height, byte shutState) {
-        byte[] data = ByteBuffer.allocate(13)
-                .put(id).putShort(width).putShort(height).put(shutState).array();
-        return genCommandData(STATE, data);
+    public static DCByteBuffer genState(byte[] id, short width, short height, byte shutState) {
+        sateByteBuff.clear();
+        ByteBuffer data = sateByteBuff
+                .put(id).putShort(width).putShort(height).put(shutState);
+        return genCommandData(STATE, data, 13);
     }
 
     /**

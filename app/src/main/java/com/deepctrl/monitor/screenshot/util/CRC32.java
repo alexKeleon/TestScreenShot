@@ -45,10 +45,10 @@ public class CRC32 {
      * @param data
      * @return
      */
-    public static int genCRC32(byte[] data) {
+    public static int genCRC32(byte[] data, int len) {
         int crc = 0xFFFFFFFF;
         System.out.println(crc);
-        for (int i = 0; i < data.length; ++i) {
+        for (int i = 0; i < len; ++i) {
             byte c = data[i];
             crc = ((crc >>> 8) & 0x00FFFFFF) ^ crcTable[(crc ^ c) & 0xFF];
         }

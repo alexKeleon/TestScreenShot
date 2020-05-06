@@ -5,10 +5,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 
+import com.deepctrl.monitor.screenshot.entity.DCByteBuffer;
+
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class ImageProcessor {
 
@@ -27,6 +27,11 @@ public class ImageProcessor {
 
     private Bitmap smallBm;
 
+    /**
+     * 图片png对应的byte array
+     */
+    private static byte[] pngBytes = new byte[1000000];
+
     private ImageProcessor () {
 
     }
@@ -35,7 +40,7 @@ public class ImageProcessor {
         return INSTANCE;
     }
 
-    public  byte[] compress2png(Bitmap bitmap) {
+    public DCByteBuffer compress2png(Bitmap bitmap) {
 
         float scaleWidth = (float)WIDTH / (float) bitmap.getWidth();
         float scaleHeight = (float)HEIGHT / (float) bitmap.getHeight();
@@ -49,7 +54,13 @@ public class ImageProcessor {
         canvas.drawBitmap(bitmap, 0, 0, null);
         out.reset();
         smallBm.compress(Bitmap.CompressFormat.PNG, 100, out);
-        return out.toByteArray();
+        int picLen = out.size();
+        Arrays.fill(pngBytes, (byte)0);
+        out.write(pngBytes, 0, picLen);
+        DCByteBuffer DCByteBuffer = new DCByteBuffer();
+        DCByteBuffer.setLen(picLen);
+        DCByteBuffer.setBytes(pngBytes);
+        return DCByteBuffer;
     }
 
     public int calculateInSampleSize(BitmapFactory.Options options) {

@@ -11,15 +11,14 @@ import android.util.Log;
 
 import com.deepctrl.monitor.screenshot.Constants;
 import com.deepctrl.monitor.screenshot.Screen;
+import com.deepctrl.monitor.screenshot.entity.DCByteBuffer;
 import com.deepctrl.monitor.screenshot.tcpclient.TcpConnector;
-import com.deepctrl.monitor.screenshot.util.ByteUtil;
 import com.deepctrl.monitor.screenshot.util.Command;
 import com.deepctrl.monitor.screenshot.util.ImageProcessor;
 import com.deepctrl.monitor.screenshot.util.NetUtil;
 import com.deepctrl.monitor.screenshot.util.SysUtil;
 import com.shine.utilitylib.A64Utility;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -64,14 +63,14 @@ public class ShotHandler {
     }
 
     public static void sendImage2AICenter(Bitmap bitmap, Context context) {
-        byte[] pngBytes = ImageProcessor.getINSTANCE().compress2png(bitmap);
-        byte[] frame = Command.genFrame(NetUtil.fetchDeviceId(), pngBytes);
+        DCByteBuffer DCByteBuffer = ImageProcessor.getINSTANCE().compress2png(bitmap);
+        DCByteBuffer frameByteBuff = Command.genFrame(NetUtil.fetchDeviceId(), DCByteBuffer);
         short width = (short) SysUtil.getWindowWidth(context);
         short height = (short) SysUtil.getWindowHeight(context);
-        byte[] state = Command.genState(NetUtil.fetchDeviceId(), width, height, Screen.status);
-        TcpConnector.getINSTANCE().send(state);
-        TcpConnector.getINSTANCE().send(frame);
-        Log.i("screenshot-tcp", "frame size is: " + frame.length + " screen status is" + Screen.status);
+        DCByteBuffer stateByteBuff = Command.genState(NetUtil.fetchDeviceId(), width, height, Screen.status);
+        TcpConnector.getINSTANCE().send(stateByteBuff.getBytes(), stateByteBuff.getLen());
+        TcpConnector.getINSTANCE().send(frameByteBuff.getBytes(), frameByteBuff.getLen());
+        Log.i("screenshot-tcp", "frame size is: " + frameByteBuff.getLen() + " screen status is" + Screen.status);
 
     }
 
